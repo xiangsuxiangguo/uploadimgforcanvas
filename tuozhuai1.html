@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+.div1{ border:red 1px solid; width:500px; height:500px; margin:30px auto; position:relative; overflow:hidden;}
+.div2{ width:98px; height:98px; background:#000; position:absolute; left:0; top:0px; border:1px dashed #0099FF; opacity:0.6;cursor:move;}
+.div2 span{ width:6px; height:6px; background:#0099FF; position:absolute;}
+.point_rb{ right:-1px; bottom:-1px; cursor:nw-resize;}
+</style>
+</head>
+<body>
+<div class="div1" id="div1">
+	<img src="2.jpg" />
+	<div class="div2" id="div2">
+    	<span class="point_rb" id="point_rb"></span>
+    </div>
+</div>
+<input type="file" id="file1" />
+<input type="button" id="btn1" value="截图" />
+
+<script>
+var oFile=document.getElementById('file1');
+var oInfo='';
+var oDiv1=document.getElementById('div1');
+var oDiv2=document.getElementById('div2');
+var oBtn=document.getElementById('btn1');
+var oImg=document.getElementsByTagName('img')[0];
+var oSpan=document.getElementById('point_rb');
+oSpan.onmousedown=function(e){
+	var e=e||event;
+	var setX=e.clientX;
+	var setY=e.clientY;
+	var setW=oDiv2.offsetWidth;
+	var setH=oDiv2.offsetHeight;
+	var setL=oDiv2.offsetLeft;
+	var setT=oDiv2.offsetTop;
+	if (oSpan.setCapture){
+		oSpan.setCapture();//IE捕捉对象
+	};
+	document.onmousemove=function(e){ 
+		var e=e||event;
+		var nowX=parseInt(e.clientX-setX);
+		var nowY=parseInt(e.clientY-setY);
+		if(setW+nowX<=100){
+			oDiv2.style.width=98+'px';	
+		}else if(setW+nowX>=oDiv1.offsetWidth-setL){
+			oDiv2.style.width=oDiv1.offsetWidth-2-setL+'px';
+		}else{
+			oDiv2.style.width=setW+nowX+'px';	
+		};
+		if(setH+nowY<=100){
+			oDiv2.style.height=98+'px';	
+		}else if(setH+nowY>=oDiv1.offsetHeight-setT){
+			oDiv2.style.height=oDiv1.offsetHeight-2-setT+'px';	
+		}else{
+			oDiv2.style.height=setH+nowY+'px';	
+		};
+		e.stopPropagation();
+	};
+	document.onmouseup=function(){
+		document.onmousemove=null;
+		if (oSpan.releaseCapture) {
+			oSpan.releaseCapture();//释放捕捉
+		}
+	}
+	e.stopPropagation();
+	return false;
+};
+oFile.onchange=function(){
+	oInfo=oFile.files[0];
+	var oReader=new FileReader();
+	oReader.readAsDataURL(oInfo);
+	oReader.onload=function(){
+		oImg.src=this.result;
+	}
+}
+oBtn.onclick=function(){
+	var oCanvas=document.createElement('canvas');
+	oCanvas.width=oDiv2.offsetWidth;
+	oCanvas.height=oDiv2.offsetHeight;	
+	var oG=oCanvas.getContext('2d');
+	oG.drawImage(oImg,oDiv2.offsetLeft,oDiv2.offsetTop,oDiv2.offsetWidth,oDiv2.offsetHeight,0,0,oDiv2.offsetWidth,oDiv2.offsetHeight);
+	window.open(oCanvas.toDataURL("image/png"));
+}
+oDiv2.onmousedown=function(e){
+	var e=e||event;
+	var theX=e.clientX-this.offsetLeft-oDiv1.offsetLeft;
+	var theY=e.clientY-this.offsetTop-oDiv1.offsetTop;
+	if (oDiv2.setCapture){
+		oDiv2.setCapture();
+	}
+	document.onmousemove=function(e){
+		var e=e||event;
+		var theX1=e.clientX-theX-oDiv1.offsetLeft;
+		var theY1=e.clientY-theY-oDiv1.offsetTop;
+		if(theX1<=0){
+			theX1=0;	
+		}else if(theX1>=oDiv1.offsetWidth-oDiv2.offsetWidth-2){
+			theX1=oDiv1.offsetWidth-oDiv2.offsetWidth-2;	
+		}
+		if(theY1<=0){
+			theY1=0;	
+		}else if(theY1>=oDiv1.offsetHeight-oDiv2.offsetHeight-2){
+			theY1=oDiv1.offsetHeight-oDiv2.offsetHeight-2;	
+		}
+		oDiv2.style.left=theX1+'px';
+		oDiv2.style.top=theY1+'px';
+	};
+	document.onmouseup=function(){
+		document.onmousemove='';
+		if (oDiv2.releaseCapture) {
+			oDiv2.releaseCapture();
+		}
+	}
+	return false;
+}
+</script>
+</body>
+</html>
